@@ -1,15 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
-
+    compileSdkVersion 26
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "com.example.ti.ble.sensortag"
-        minSdkVersion 27
-        targetSdkVersion 27
+        minSdkVersion 26
+        targetSdkVersion 26
     }
-
     buildTypes {
         release {
             debuggable true
@@ -22,10 +20,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    productFlavors {
+    }
 }
 
 dependencies {
-    implementation 'com.android.support:support-v4:27.+'
+    implementation 'com.android.support:support-v4:26.1.0'
     implementation files('libs/org.eclipse.paho.android.service-1.0.2.jar')
     implementation files('libs/org.eclipse.paho.client.mqttv3-1.0.2.jar')
 }
