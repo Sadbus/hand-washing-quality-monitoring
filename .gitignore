@@ -37,8 +37,10 @@ captures/
 .idea/workspace.xml
 .idea/tasks.xml
 .idea/gradle.xml
+.idea/assetWizardSettings.xml
 .idea/dictionaries
 .idea/libraries
+.idea/caches
 
 # Keystore files
 *.jks
@@ -54,3 +56,10 @@ freeline.py
 freeline/
 freeline_project_description.json
 *.DS_Store
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+fastlane/readme.md
