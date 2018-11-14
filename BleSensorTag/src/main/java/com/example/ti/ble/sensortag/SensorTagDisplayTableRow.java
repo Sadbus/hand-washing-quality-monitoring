@@ -62,13 +62,15 @@ import android.widget.RelativeLayout;
 
 import com.example.ti.util.GenericCharacteristicTableRow;
 
-public class SensorTagDisplayTableRow extends GenericCharacteristicTableRow {
+public class SensorTagDisplayTableRow extends GenericCharacteristicTableRow
+{
 
     EditText displayText;
     CheckBox displayInvert;
     CheckBox displayClock;
 
-    SensorTagDisplayTableRow(Context con) {
+    SensorTagDisplayTableRow(Context con)
+    {
         super(con);
         this.title.setText("Display control");
 
@@ -108,8 +110,8 @@ public class SensorTagDisplayTableRow extends GenericCharacteristicTableRow {
         RelativeLayout.LayoutParams displayClockLayout = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
-        displayClockLayout.setMargins(30,10,0,30);
-        displayClockLayout.addRule(RelativeLayout.BELOW,this.displayText.getId());
+        displayClockLayout.setMargins(30, 10, 0, 30);
+        displayClockLayout.addRule(RelativeLayout.BELOW, this.displayText.getId());
         displayClockLayout.addRule(RelativeLayout.RIGHT_OF, displayInvert.getId());
         this.displayClock.setLayoutParams(displayClockLayout);
 

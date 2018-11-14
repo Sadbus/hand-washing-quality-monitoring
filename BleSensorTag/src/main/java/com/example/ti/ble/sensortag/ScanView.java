@@ -106,12 +106,12 @@ public class ScanView extends Fragment {
     mContext = mActivity.getApplicationContext();
 
     // Initialize widgets
-    mStatus = (TextView) view.findViewById(R.id.status);
-    mBtnScan = (Button) view.findViewById(R.id.btn_scan);
-    mDeviceListView = (ListView) view.findViewById(R.id.device_list);
+    mStatus = view.findViewById(R.id.status);
+    mBtnScan = view.findViewById(R.id.btn_scan);
+    mDeviceListView = view.findViewById(R.id.device_list);
     mDeviceListView.setClickable(true);
     mDeviceListView.setOnItemClickListener(mDeviceClickListener);
-    mEmptyMsg = (TextView)view.findViewById(R.id.no_device);    
+    mEmptyMsg = view.findViewById(R.id.no_device);
     mBusy = false;
     
     // Alert parent activity
