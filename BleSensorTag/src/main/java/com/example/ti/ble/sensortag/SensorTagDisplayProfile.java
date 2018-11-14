@@ -70,150 +70,189 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SensorTagDisplayProfile extends GenericBluetoothProfile {
+public class SensorTagDisplayProfile extends GenericBluetoothProfile
+{
     public static final String TI_SENSORTAG_TWO_DISPLAY_SERVICE_UUID = "f000ad00-0451-4000-b000-000000000000";
     public static final String TI_SENSORTAG_TWO_DISPLAY_DATA_UUID = "f000ad01-0451-4000-b000-000000000000";
     public static final String TI_SENSORTAG_TWO_DISPLAY_CONTROL_UUID = "f000ad02-0451-4000-b000-000000000000";
     SensorTagDisplayTableRow cRow;
     Timer displayClock;
 
-    public SensorTagDisplayProfile(Context con,BluetoothDevice device,BluetoothGattService service,BluetoothLeService controller) {
+    public SensorTagDisplayProfile(Context con, BluetoothDevice device, BluetoothGattService service, BluetoothLeService controller)
+    {
         super(con, device, service, controller);
         this.cRow = new SensorTagDisplayTableRow(con);
         this.tRow = this.cRow;
 
         List<BluetoothGattCharacteristic> characteristics = this.mBTService.getCharacteristics();
 
-        for (BluetoothGattCharacteristic c : characteristics) {
-            if (c.getUuid().toString().equals(TI_SENSORTAG_TWO_DISPLAY_DATA_UUID)) {
+        for (BluetoothGattCharacteristic c : characteristics)
+        {
+            if (c.getUuid().toString().equals(TI_SENSORTAG_TWO_DISPLAY_DATA_UUID))
+            {
                 this.dataC = c;
             }
-            if (c.getUuid().toString().equals(TI_SENSORTAG_TWO_DISPLAY_CONTROL_UUID)) {
+            if (c.getUuid().toString().equals(TI_SENSORTAG_TWO_DISPLAY_CONTROL_UUID))
+            {
                 this.configC = c;
             }
         }
         this.tRow.setIcon(this.getIconPrefix(), this.dataC.getUuid().toString());
 
-        this.cRow.displayClock.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        this.cRow.displayClock.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    if (displayClock != null) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            {
+                if (isChecked)
+                {
+                    if (displayClock != null)
+                    {
                         displayClock.cancel();
                     }
                     displayClock = new Timer();
-                    displayClock.schedule(new clockTask(),1000,1000);
-                }
-                else {
-                    if (displayClock != null) {
+                    displayClock.schedule(new clockTask(), 1000, 1000);
+                } else
+                {
+                    if (displayClock != null)
+                    {
                         displayClock.cancel();
                     }
                 }
             }
         });
 
-        this.cRow.displayInvert.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        this.cRow.displayInvert.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (configC != null) {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            {
+                if (configC != null)
+                {
                     byte b = 0x05;
                     int error = mBTLeService.writeCharacteristic(configC, b);
-                    if (error != 0) {
+                    if (error != 0)
+                    {
                         Log.d("SensorTagDisplayProfile", "Error writing config characteristic !");
                     }
                 }
             }
         });
 
-        this.cRow.displayText.addTextChangedListener(new TextWatcher() {
+        this.cRow.displayText.addTextChangedListener(new TextWatcher()
+        {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after)
+            {
 
             }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
                 Log.d("SensorTagDisplayProfile", "New Display Text:" + s);
                 byte[] p = new byte[s.length()];
-                for (int ii = 0; ii < s.length(); ii++) {
+                for (int ii = 0; ii < s.length(); ii++)
+                {
                     p[ii] = (byte) s.charAt(ii);
                 }
-                if (dataC != null) {
+                if (dataC != null)
+                {
                     int error = mBTLeService.writeCharacteristic(dataC, p);
-                    if (error != 0) {
+                    if (error != 0)
+                    {
                         Log.d("SensorTagDisplayProfile", "Error writing data characteristic !");
                     }
                 }
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(Editable s)
+            {
 
             }
         });
 
 
-
-
     }
 
-    public static boolean isCorrectService(BluetoothGattService service) {
-        if ((service.getUuid().toString().compareTo(TI_SENSORTAG_TWO_DISPLAY_SERVICE_UUID.toString())) == 0) {
+    public static boolean isCorrectService(BluetoothGattService service)
+    {
+        if ((service.getUuid().toString().compareTo(TI_SENSORTAG_TWO_DISPLAY_SERVICE_UUID.toString())) == 0)
+        {
             return true;
-        }
-        else return false;
+        } else return false;
     }
 
     @Override
-    public void enableService () {
-        if (this.cRow.displayClock.isChecked()) {
-            if (displayClock != null) {
+    public void enableService()
+    {
+        if (this.cRow.displayClock.isChecked())
+        {
+            if (displayClock != null)
+            {
                 displayClock.cancel();
             }
             displayClock = new Timer();
-            displayClock.schedule(new clockTask(),1000,1000);
+            displayClock.schedule(new clockTask(), 1000, 1000);
         }
     }
+
     @Override
-    public void disableService () {
-        if (displayClock != null) {
+    public void disableService()
+    {
+        if (displayClock != null)
+        {
             displayClock.cancel();
         }
     }
+
     @Override
-    public void configureService() {
+    public void configureService()
+    {
 
     }
+
     @Override
-    public void deConfigureService() {
+    public void deConfigureService()
+    {
 
     }
+
     @Override
-    public void didUpdateValueForCharacteristic(BluetoothGattCharacteristic c) {
+    public void didUpdateValueForCharacteristic(BluetoothGattCharacteristic c)
+    {
     }
 
-    private class clockTask extends TimerTask {
+    private class clockTask extends TimerTask
+    {
         @Override
-        public void run() {
+        public void run()
+        {
             Date d = new Date();
-            final String date = String.format("%02d:%02d:%02d        ",d.getHours(),d.getMinutes(),d.getSeconds());
+            final String date = String.format("%02d:%02d:%02d        ", d.getHours(), d.getMinutes(), d.getSeconds());
             byte[] b = new byte[date.length()];
-            for (int ii = 0; ii < date.length(); ii++) {
-                b[ii] = (byte)date.charAt(ii);
+            for (int ii = 0; ii < date.length(); ii++)
+            {
+                b[ii] = (byte) date.charAt(ii);
             }
-            if (dataC != null) {
-                Activity a = (Activity)context;
-                a.runOnUiThread(new Runnable() {
+            if (dataC != null)
+            {
+                Activity a = (Activity) context;
+                a.runOnUiThread(new Runnable()
+                {
                     @Override
-                    public void run() {
+                    public void run()
+                    {
                         cRow.displayText.setText(date);
                     }
                 });
             }
-            try {
+            try
+            {
                 Thread.sleep(1000);
-            }
-            catch (Exception e) {
+            } catch (Exception e)
+            {
                 e.printStackTrace();
             }
         }

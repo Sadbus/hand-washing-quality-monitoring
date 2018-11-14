@@ -77,199 +77,138 @@ import com.example.ti.ble.common.GattInfo;
 import com.example.ti.ble.common.GenericBluetoothProfile;
 import com.example.ti.util.Point3D;
 
-import org.json.JSONObject;
 
-public class SensorTagMovementProfile extends GenericBluetoothProfile {
+public class SensorTagMovementProfile extends GenericBluetoothProfile
+{
 
-	public SensorTagMovementProfile(Context con,BluetoothDevice device,BluetoothGattService service,BluetoothLeService controller) {
-		super(con,device,service,controller);
-		this.tRow =  new SensorTagMovementTableRow(con);
-		
-		List<BluetoothGattCharacteristic> characteristics = this.mBTService.getCharacteristics();
-		
-		for (BluetoothGattCharacteristic c : characteristics) {
-			if (c.getUuid().toString().equals(SensorTagGatt.UUID_MOV_DATA.toString())) {
-				this.dataC = c;
-			}
-			if (c.getUuid().toString().equals(SensorTagGatt.UUID_MOV_CONF.toString())) {
-				this.configC = c;
-			}
-			if (c.getUuid().toString().equals(SensorTagGatt.UUID_MOV_PERI.toString())) {
-				this.periodC = c;
-			}
-		}
-		
-		
-		this.tRow.setIcon(this.getIconPrefix(), this.dataC.getUuid().toString());
-		this.tRow.title.setText("Movement Data");
-		//this.tRow.title.setText(GattInfo.uuidToName(UUID.fromString(this.dataC.getUuid().toString())));
-		this.tRow.uuidLabel.setText(this.dataC.getUuid().toString());
-		this.tRow.value.setText("X:0.00G, Y:0.00G, Z:0.00G");
-		SensorTagMovementTableRow row = (SensorTagMovementTableRow)this.tRow;
-		
-		row.gyroValue.setText("X:0.00'/s, Y:0.00'/s, Z:0.00'/s");
-		row.magValue.setText("X:0.00mT, Y:0.00mT, Z:0.00mT");
-        row.WOS.setChecked(true);
-        row.WOS.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                byte b[] = new byte[] {0x7F,0x00};
-                if (isChecked) {
-                    b[0] = (byte)0xFF;
-                }
-                int error = mBTLeService.writeCharacteristic(configC, b);
-                if (error != 0) {
-                    if (configC != null)
-                        Log.d("SensorTagMovementProfile","Sensor config failed: " + configC.getUuid().toString() + " Error: " + error);
-                }
+    public SensorTagMovementProfile(Context con, BluetoothDevice device, BluetoothGattService service, BluetoothLeService controller)
+    {
+        super(con, device, service, controller);
+        this.tRow = new SensorTagMovementTableRow(con);
+
+        List<BluetoothGattCharacteristic> characteristics = this.mBTService.getCharacteristics();
+
+        for (BluetoothGattCharacteristic c : characteristics)
+        {
+            if (c.getUuid().toString().equals(SensorTagGatt.UUID_MOV_DATA.toString()))
+            {
+                this.dataC = c;
             }
-        });
-		this.tRow.periodBar.setProgress(100);
-	}
-	
-	public static boolean isCorrectService(BluetoothGattService service) {
-		if ((service.getUuid().toString().compareTo(SensorTagGatt.UUID_MOV_SERV.toString())) == 0) {
-			return true;
-		}
-		else return false;
-	}
-	@Override 
-	public void enableService() {
-        byte b[] = new byte[] {0x7F,0x00};
-        SensorTagMovementTableRow row = (SensorTagMovementTableRow)this.tRow;
-        if (row.WOS.isChecked()) b[0] = (byte)0xFF;
-        int error = mBTLeService.writeCharacteristic(this.configC, b);
-        if (error != 0) {
-            if (this.configC != null)
-            Log.d("SensorTagMovementProfile","Sensor config failed: " + this.configC.getUuid().toString() + " Error: " + error);
-        }
-        error = this.mBTLeService.setCharacteristicNotification(this.dataC, true);
-        if (error != 0) {
-            if (this.dataC != null)
-            Log.d("SensorTagMovementProfile","Sensor notification enable failed: " + this.configC.getUuid().toString() + " Error: " + error);
+            if (c.getUuid().toString().equals(SensorTagGatt.UUID_MOV_CONF.toString()))
+            {
+                this.configC = c;
+            }
+            if (c.getUuid().toString().equals(SensorTagGatt.UUID_MOV_PERI.toString()))
+            {
+                this.periodC = c;
+            }
         }
 
-		this.periodWasUpdated(1000);
-        this.isEnabled = true;
-	}
-	@Override 
-	public void disableService() {
-        int error = mBTLeService.writeCharacteristic(this.configC, new byte[] {0x00,0x00});
-        if (error != 0) {
-            if (this.configC != null)
-            Log.d("SensorTagMovementProfile","Sensor config failed: " + this.configC.getUuid().toString() + " Error: " + error);
-        }
-        error = this.mBTLeService.setCharacteristicNotification(this.dataC, false);
-        if (error != 0) {
-            if (this.dataC != null)
-            Log.d("SensorTagMovementProfile","Sensor notification disable failed: " + this.configC.getUuid().toString() + " Error: " + error);
-        }
-        this.isEnabled = false;
-	}
-	public void didWriteValueForCharacteristic(BluetoothGattCharacteristic c) {
-		
-	}
-	public void didReadValueForCharacteristic(BluetoothGattCharacteristic c) {
-		
-	}
-	@Override
-    public void didUpdateValueForCharacteristic(BluetoothGattCharacteristic c) {
-        byte[] value = c.getValue();
-			if (c.equals(this.dataC)){
-				Point3D v;
-				// Accelerometer Values
-				v = Sensor.MOVEMENT_ACC.convert(value);
-				if (this.tRow.config == false) this.tRow.value.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2fG</font>, <font color=#00967D>Y:%.2fG</font>, <font color=#00000>Z:%.2fG</font>", v.x, v.y, v.z)));
-				this.tRow.sl1.addValue((float)v.x);
-				this.tRow.sl2.addValue((float)v.y);
-				this.tRow.sl3.addValue((float)v.z);
 
-				// Gyroscope Values
-				v = Sensor.MOVEMENT_GYRO.convert(value);
-				SensorTagMovementTableRow row = (SensorTagMovementTableRow)this.tRow;
-				row.gyroValue.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2f°/s</font>, <font color=#00967D>Y:%.2f°/s</font>, <font color=#00000>Z:%.2f°/s</font>", v.x, v.y, v.z)));
-				row.sl4.addValue((float)v.x);
-				row.sl5.addValue((float)v.y);
-				row.sl6.addValue((float)v.z);
+        this.tRow.setIcon(this.getIconPrefix(), this.dataC.getUuid().toString());
 
-				// Magnemoter Values
-				v = Sensor.MOVEMENT_MAG.convert(value);
-				row.magValue.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2fuT</font>, <font color=#00967D>Y:%.2fuT</font>, <font color=#00000>Z:%.2fuT</font>", v.x, v.y, v.z)));
-				row.sl7.addValue((float)v.x);
-				row.sl8.addValue((float)v.y);
-				row.sl9.addValue((float)v.z);
+        this.tRow.title.setText(GattInfo.uuidToName(UUID.fromString(this.dataC.getUuid().toString())));
+        this.tRow.uuidLabel.setText(this.dataC.getUuid().toString());
+        this.tRow.value.setText("X:0.00G, Y:0.00G, Z:0.00G");
+        SensorTagMovementTableRow row = (SensorTagMovementTableRow) this.tRow;
 
+        row.gyroValue.setText("X:0.00'/s, Y:0.00'/s, Z:0.00'/s");
+        this.tRow.periodBar.setProgress(100);
+    }
 
-				// TODO: 1. Gather Store n Samples in a JSON variable
-
-				// TODO: 2. Send the Individual Json to the Webserver
-
-				String URL="vg.no";
-
-				final RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.mThis);
-
-				// Sending String request using Volley
-				StringRequest objectRequest = new StringRequest(
-						Request.Method.POST,
-						URL,
-						new Response.Listener<String>() {
-							@Override
-							public void onResponse(String response){
-								//Log.e("Rest Response", response.toString());
-								requestQueue.stop();
-							}
-						},
-						new Response.ErrorListener() {
-							@Override
-							public void onErrorResponse(VolleyError error){
-								Log.e("Rest Response", error.toString());
-								error.printStackTrace();
-								requestQueue.stop();
-							}
-						}
-				);
-
-				/*
-				JsonObjectRequest objectRequest = new JsonObjectRequest(
-						Request.Method.GET,
-						URL,
-						null,
-						new Response.Listener<JSONObject>() {
-							@Override
-							public void onResponse(JSONObject response){
-								Log.e("Rest Response", response.toString());
-							}
-						},
-						new Response.ErrorListener() {
-							@Override
-							public void onErrorResponse(VolleyError error){
-								Log.e("Rest Response", error.toString());
-							}
-						}
-				);
-				*/
-				requestQueue.add(objectRequest);
-
-			}
-
-	}
-
+    public static boolean isCorrectService(BluetoothGattService service)
+    {
+        if ((service.getUuid().toString().compareTo(SensorTagGatt.UUID_MOV_SERV.toString())) == 0)
+        {
+            return true;
+        } else return false;
+    }
 
     @Override
-    public Map<String,String> getMQTTMap() {
+    public void enableService()
+    {
+        byte b[] = new byte[]{0x7F, 0x00};
+        SensorTagMovementTableRow row = (SensorTagMovementTableRow) this.tRow;
+        int error = mBTLeService.writeCharacteristic(this.configC, b);
+        if (error != 0)
+        {
+            if (this.configC != null)
+                Log.d("SensorTagMovementProfile", "Sensor config failed: " + this.configC.getUuid().toString() + " Error: " + error);
+        }
+        error = this.mBTLeService.setCharacteristicNotification(this.dataC, true);
+        if (error != 0)
+        {
+            if (this.dataC != null)
+                Log.d("SensorTagMovementProfile", "Sensor notification enable failed: " + this.configC.getUuid().toString() + " Error: " + error);
+        }
+
+        this.periodWasUpdated(1000);
+        this.isEnabled = true;
+    }
+
+    @Override
+    public void disableService()
+    {
+        int error = mBTLeService.writeCharacteristic(this.configC, new byte[]{0x00, 0x00});
+        if (error != 0)
+        {
+            if (this.configC != null)
+                Log.d("SensorTagMovementProfile", "Sensor config failed: " + this.configC.getUuid().toString() + " Error: " + error);
+        }
+        error = this.mBTLeService.setCharacteristicNotification(this.dataC, false);
+        if (error != 0)
+        {
+            if (this.dataC != null)
+                Log.d("SensorTagMovementProfile", "Sensor notification disable failed: " + this.configC.getUuid().toString() + " Error: " + error);
+        }
+        this.isEnabled = false;
+    }
+
+    public void didWriteValueForCharacteristic(BluetoothGattCharacteristic c)
+    {
+
+    }
+
+    public void didReadValueForCharacteristic(BluetoothGattCharacteristic c)
+    {
+
+    }
+
+    @Override
+    public void didUpdateValueForCharacteristic(BluetoothGattCharacteristic c)
+    {
+        byte[] value = c.getValue();
+
+        if (c.equals(this.dataC))
+        {
+            Point3D v;
+            v = Sensor.MOVEMENT_ACC.convert(value);
+            if (this.tRow.config == false)
+                this.tRow.value.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2fG</font>, <font color=#00967D>Y:%.2fG</font>, <font color=#00000>Z:%.2fG</font>", v.x, v.y, v.z)));
+            this.tRow.sl1.addValue((float) v.x);
+            this.tRow.sl2.addValue((float) v.y);
+            this.tRow.sl3.addValue((float) v.z);
+            v = Sensor.MOVEMENT_GYRO.convert(value);
+            SensorTagMovementTableRow row = (SensorTagMovementTableRow) this.tRow;
+            row.gyroValue.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2f°/s</font>, <font color=#00967D>Y:%.2f°/s</font>, <font color=#00000>Z:%.2f°/s</font>", v.x, v.y, v.z)));
+            row.sl4.addValue((float) v.x);
+            row.sl5.addValue((float) v.y);
+            row.sl6.addValue((float) v.z);
+        }
+    }
+
+    @Override
+    public Map<String, String> getMQTTMap()
+    {
         Point3D v = Sensor.MOVEMENT_ACC.convert(this.dataC.getValue());
-        Map<String,String> map = new HashMap<String, String>();
-        map.put("acc_x",String.format("%.2f",v.x));
-        map.put("acc_y",String.format("%.2f",v.y));
-        map.put("acc_z",String.format("%.2f",v.z));
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("acc_x", String.format("%.2f", v.x));
+        map.put("acc_y", String.format("%.2f", v.y));
+        map.put("acc_z", String.format("%.2f", v.z));
         v = Sensor.MOVEMENT_GYRO.convert(this.dataC.getValue());
-        map.put("gyro_x",String.format("%.2f",v.x));
-        map.put("gyro_y",String.format("%.2f",v.y));
-        map.put("gyro_z",String.format("%.2f",v.z));
-        v = Sensor.MOVEMENT_MAG.convert(this.dataC.getValue());
-        map.put("compass_x",String.format("%.2f",v.x));
-        map.put("compass_y",String.format("%.2f",v.y));
-        map.put("compass_z",String.format("%.2f",v.z));
+        map.put("gyro_x", String.format("%.2f", v.x));
+        map.put("gyro_y", String.format("%.2f", v.y));
+        map.put("gyro_z", String.format("%.2f", v.z));
         return map;
     }
 }
