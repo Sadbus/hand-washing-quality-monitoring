@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/BleSensorTag/BleSensorTag.iml" filepath="$PROJECT_DIR$/BleSensorTag/BleSensorTag.iml" />
-      <module fileurl="file://$PROJECT_DIR$/SensorTag-CC2650.iml" filepath="$PROJECT_DIR$/SensorTag-CC2650.iml" />
+      <module fileurl="file://$PROJECT_DIR$/handwash.iml" filepath="$PROJECT_DIR$/handwash.iml" />
     </modules>
   </component>
 </project>

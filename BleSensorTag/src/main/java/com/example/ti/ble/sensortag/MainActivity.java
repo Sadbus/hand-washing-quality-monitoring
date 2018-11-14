@@ -95,7 +95,6 @@ import com.example.ti.ble.common.HCIDefines;
 import com.example.ti.ble.common.HelpView;
 import com.example.ti.util.CustomToast;
 
-@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class MainActivity extends ViewPagerActivity {
 	// Log
 	// private static final String TAG = "MainActivity";
@@ -111,7 +110,7 @@ public class MainActivity extends ViewPagerActivity {
 	private static final int REQ_DEVICE_ACT = 1;
 
 	// GUI
-	private static MainActivity mThis = null;
+	public static MainActivity mThis = null;
 	private ScanView mScanView;
 	private Intent mDeviceIntent;
 	private static final int STATUS_DURATION = 5;
@@ -167,6 +166,7 @@ public class MainActivity extends ViewPagerActivity {
 		}
 	}
 
+	@TargetApi(Build.VERSION_CODES.M)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		// Start the application
@@ -670,5 +670,7 @@ public class MainActivity extends ViewPagerActivity {
 			});
 		}
 	};
+
+
 
 }

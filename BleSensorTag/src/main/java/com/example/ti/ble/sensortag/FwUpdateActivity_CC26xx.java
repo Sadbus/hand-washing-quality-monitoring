@@ -52,6 +52,7 @@
  **************************************************************************************************/
 package com.example.ti.ble.sensortag;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothGatt;
@@ -173,6 +174,7 @@ public class FwUpdateActivity_CC26xx extends Activity {
     private List<tiFirmwareEntry> fwEntries;
     private AlertDialog.Builder testFailedAlertDialog;
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     public FwUpdateActivity_CC26xx() {
         mDeviceActivity = DeviceActivity.getInstance();
 
@@ -358,6 +360,7 @@ public class FwUpdateActivity_CC26xx extends Activity {
     }
 
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+        @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -491,6 +494,7 @@ public class FwUpdateActivity_CC26xx extends Activity {
         startActivityForResult(i, FILE_ACTIVITY_REQ);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void startProgramming() {
         mLog.append("Programming started\n");
         mProgramming = true;
@@ -603,6 +607,7 @@ public class FwUpdateActivity_CC26xx extends Activity {
         mProgressInfo.setText(txt);
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void setConnectionParameters() {
         // Make sure connection interval is long enough for OAD (Android default connection interval is 7.5 ms)
         byte[] value = {Conversion.loUint16(OAD_CONN_INTERVAL), Conversion.hiUint16(OAD_CONN_INTERVAL), Conversion.loUint16(OAD_CONN_INTERVAL),
@@ -631,6 +636,7 @@ public class FwUpdateActivity_CC26xx extends Activity {
    * Called when a notification with the current image info has been received
    */
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     private void programBlock() {
         if (!mProgramming)
             return;

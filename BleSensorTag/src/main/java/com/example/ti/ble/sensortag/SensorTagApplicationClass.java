@@ -52,6 +52,7 @@
  **************************************************************************************************/
 package com.example.ti.ble.sensortag;
 
+import android.annotation.TargetApi;
 import android.app.Application;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -62,6 +63,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -79,7 +81,7 @@ public class SensorTagApplicationClass extends Application{
     private BluetoothLeService mBluetoothLeService = null;
     private IntentFilter mFilter;
     public BluetoothAdapter mBtAdapter = null;
-    public static BluetoothManager mBluetoothManager;
+    public BluetoothManager mBluetoothManager;
     // Register the BroadcastReceiver
 
     @Override
@@ -97,7 +99,8 @@ public class SensorTagApplicationClass extends Application{
         // Initializes a Bluetooth adapter. For API level 18 and above, get a
         // reference to BluetoothAdapter through BluetoothManager.
         mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBtAdapter = mBluetoothManager.getAdapter();
+
+        mBtAdapter = mBluetoothManager != null ? mBluetoothManager.getAdapter() : null;
 
         // Checks if Bluetooth is supported on the device.
         if (mBtAdapter == null) {

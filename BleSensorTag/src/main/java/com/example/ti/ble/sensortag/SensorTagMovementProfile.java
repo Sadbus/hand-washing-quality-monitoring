@@ -65,13 +65,22 @@ import android.text.Html;
 import android.util.Log;
 import android.widget.CompoundButton;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.ti.ble.common.BluetoothLeService;
 import com.example.ti.ble.common.GattInfo;
 import com.example.ti.ble.common.GenericBluetoothProfile;
 import com.example.ti.util.Point3D;
 
+import org.json.JSONObject;
+
 public class SensorTagMovementProfile extends GenericBluetoothProfile {
-	
+
 	public SensorTagMovementProfile(Context con,BluetoothDevice device,BluetoothGattService service,BluetoothLeService controller) {
 		super(con,device,service,controller);
 		this.tRow =  new SensorTagMovementTableRow(con);
@@ -92,8 +101,8 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile {
 		
 		
 		this.tRow.setIcon(this.getIconPrefix(), this.dataC.getUuid().toString());
-		
-		this.tRow.title.setText(GattInfo.uuidToName(UUID.fromString(this.dataC.getUuid().toString())));
+		this.tRow.title.setText("Movement Data");
+		//this.tRow.title.setText(GattInfo.uuidToName(UUID.fromString(this.dataC.getUuid().toString())));
 		this.tRow.uuidLabel.setText(this.dataC.getUuid().toString());
 		this.tRow.value.setText("X:0.00G, Y:0.00G, Z:0.00G");
 		SensorTagMovementTableRow row = (SensorTagMovementTableRow)this.tRow;
@@ -168,24 +177,84 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile {
         byte[] value = c.getValue();
 			if (c.equals(this.dataC)){
 				Point3D v;
+				// Accelerometer Values
 				v = Sensor.MOVEMENT_ACC.convert(value);
 				if (this.tRow.config == false) this.tRow.value.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2fG</font>, <font color=#00967D>Y:%.2fG</font>, <font color=#00000>Z:%.2fG</font>", v.x, v.y, v.z)));
 				this.tRow.sl1.addValue((float)v.x);
 				this.tRow.sl2.addValue((float)v.y);
 				this.tRow.sl3.addValue((float)v.z);
+
+				// Gyroscope Values
 				v = Sensor.MOVEMENT_GYRO.convert(value);
 				SensorTagMovementTableRow row = (SensorTagMovementTableRow)this.tRow;
 				row.gyroValue.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2f°/s</font>, <font color=#00967D>Y:%.2f°/s</font>, <font color=#00000>Z:%.2f°/s</font>", v.x, v.y, v.z)));
 				row.sl4.addValue((float)v.x);
 				row.sl5.addValue((float)v.y);
 				row.sl6.addValue((float)v.z);
+
+				// Magnemoter Values
 				v = Sensor.MOVEMENT_MAG.convert(value);
 				row.magValue.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2fuT</font>, <font color=#00967D>Y:%.2fuT</font>, <font color=#00000>Z:%.2fuT</font>", v.x, v.y, v.z)));
 				row.sl7.addValue((float)v.x);
 				row.sl8.addValue((float)v.y);
 				row.sl9.addValue((float)v.z);
+
+
+				// TODO: 1. Gather Store n Samples in a JSON variable
+
+				// TODO: 2. Send the Individual Json to the Webserver
+
+				String URL="vg.no";
+
+				final RequestQueue requestQueue = Volley.newRequestQueue(MainActivity.mThis);
+
+				// Sending String request using Volley
+				StringRequest objectRequest = new StringRequest(
+						Request.Method.POST,
+						URL,
+						new Response.Listener<String>() {
+							@Override
+							public void onResponse(String response){
+								//Log.e("Rest Response", response.toString());
+								requestQueue.stop();
+							}
+						},
+						new Response.ErrorListener() {
+							@Override
+							public void onErrorResponse(VolleyError error){
+								Log.e("Rest Response", error.toString());
+								error.printStackTrace();
+								requestQueue.stop();
+							}
+						}
+				);
+
+				/*
+				JsonObjectRequest objectRequest = new JsonObjectRequest(
+						Request.Method.GET,
+						URL,
+						null,
+						new Response.Listener<JSONObject>() {
+							@Override
+							public void onResponse(JSONObject response){
+								Log.e("Rest Response", response.toString());
+							}
+						},
+						new Response.ErrorListener() {
+							@Override
+							public void onErrorResponse(VolleyError error){
+								Log.e("Rest Response", error.toString());
+							}
+						}
+				);
+				*/
+				requestQueue.add(objectRequest);
+
 			}
+
 	}
+
+
     @Override
     public Map<String,String> getMQTTMap() {
         Point3D v = Sensor.MOVEMENT_ACC.convert(this.dataC.getValue());

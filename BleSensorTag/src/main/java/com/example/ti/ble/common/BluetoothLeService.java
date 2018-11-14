@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import android.annotation.TargetApi;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -71,6 +72,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -153,8 +155,9 @@ public class BluetoothLeService extends Service {
 	/**
 	 * GATT client callbacks
 	 */
-	private BluetoothGattCallback mGattCallbacks = new BluetoothGattCallback() {
 
+	private BluetoothGattCallback mGattCallbacks = new BluetoothGattCallback() {
+		@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 		@Override
 		public void onConnectionStateChange(BluetoothGatt gatt, int status,
 		    int newState) {
@@ -265,6 +268,7 @@ public class BluetoothLeService extends Service {
 		sendBroadcast(intent);
 	}
 
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	private void broadcastUpdate(final String action,
 	    final BluetoothGattCharacteristic characteristic, final int status) {
 		final Intent intent = new Intent(action);
@@ -323,6 +327,7 @@ public class BluetoothLeService extends Service {
 	 * 
 	 * @return Return true if the initialization is successful.
 	 */
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public boolean initialize() {
 		// For API level 18 and above, get a reference to BluetoothAdapter through
 		// BluetoothManager.
@@ -373,6 +378,7 @@ public class BluetoothLeService extends Service {
 		return START_STICKY;
 	}
 
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -416,6 +422,7 @@ public class BluetoothLeService extends Service {
         return -2;
 	}
 
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public int writeCharacteristic(
 	    BluetoothGattCharacteristic characteristic, byte b) {
 
@@ -443,6 +450,7 @@ public class BluetoothLeService extends Service {
         }
         return -2;
 	}
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public int writeCharacteristic(
 		    BluetoothGattCharacteristic characteristic, byte[] b) {
         characteristic.setValue(b);
@@ -502,6 +510,7 @@ public class BluetoothLeService extends Service {
 	 * 
 	 * @return A {@code integer} number of supported services.
 	 */
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public int getNumServices() {
 		if (mBluetoothGatt == null)
 			return 0;
@@ -516,6 +525,7 @@ public class BluetoothLeService extends Service {
 	 * 
 	 * @return A {@code List} of supported services.
 	 */
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public List<BluetoothGattService> getSupportedGattServices() {
 		if (mBluetoothGatt == null)
 			return null;
@@ -554,6 +564,7 @@ public class BluetoothLeService extends Service {
         return -2;
 	}
 
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public boolean isNotificationEnabled(
 	    BluetoothGattCharacteristic characteristic) {
         if (characteristic == null) {
@@ -581,6 +592,7 @@ public class BluetoothLeService extends Service {
 	 *         {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
 	 *         callback.
 	 */
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public boolean connect(final String address) {
 		if (mBtAdapter == null || address == null) {
 			// Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
@@ -627,6 +639,7 @@ public class BluetoothLeService extends Service {
 	 * {@code BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)}
 	 * callback.
 	 */
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public void disconnect(String address) {
 		if (mBtAdapter == null) {
 			// Log.w(TAG, "disconnect: BluetoothAdapter not initialized");
@@ -649,6 +662,7 @@ public class BluetoothLeService extends Service {
 	 * After using a given BLE device, the app must call this method to ensure
 	 * resources are released properly.
 	 */
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public void close() {
 		if (mBluetoothGatt != null) {
 			// Log.i(TAG, "close");
@@ -657,6 +671,7 @@ public class BluetoothLeService extends Service {
 		}
   }
 
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 	public int numConnectedDevices() {
 		int n = 0;
 
@@ -732,7 +747,9 @@ public class BluetoothLeService extends Service {
 	     }
 	}
 
-    public boolean requestConnectionPriority(int connectionPriority) {
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+	public boolean requestConnectionPriority(int connectionPriority) {
         return this.mBluetoothGatt.requestConnectionPriority(connectionPriority);
     }
 
@@ -850,7 +867,8 @@ public class BluetoothLeService extends Service {
         lock.unlock();
     }
 
-    public int sendNonBlockingReadRequest(bleRequest request) {
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+	public int sendNonBlockingReadRequest(bleRequest request) {
         request.status = bleRequestStatus.processing;
         if (!checkGatt()) {
             request.status = bleRequestStatus.failed;
@@ -860,7 +878,8 @@ public class BluetoothLeService extends Service {
         return 0;
     }
 
-    public int sendNonBlockingWriteRequest(bleRequest request) {
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+	public int sendNonBlockingWriteRequest(bleRequest request) {
         request.status = bleRequestStatus.processing;
         if (!checkGatt()) {
             request.status = bleRequestStatus.failed;
@@ -870,6 +889,7 @@ public class BluetoothLeService extends Service {
         return 0;
     }
 
+	@TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
     public int sendBlockingReadRequest(bleRequest request) {
         request.status = bleRequestStatus.processing;
         int timeout = 0;
@@ -888,7 +908,8 @@ public class BluetoothLeService extends Service {
         return lastGattStatus;
     }
 
-    public int sendBlockingWriteRequest(bleRequest request) {
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+	public int sendBlockingWriteRequest(bleRequest request) {
         request.status = bleRequestStatus.processing;
         int timeout = 0;
         if (!checkGatt()) {
@@ -905,7 +926,8 @@ public class BluetoothLeService extends Service {
         request.status = bleRequestStatus.done;
         return lastGattStatus;
     }
-    public int sendBlockingNotifySetting(bleRequest request) {
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+	public int sendBlockingNotifySetting(bleRequest request) {
         request.status = bleRequestStatus.processing;
         int timeout = 0;
         if (request.characteristic == null) {
