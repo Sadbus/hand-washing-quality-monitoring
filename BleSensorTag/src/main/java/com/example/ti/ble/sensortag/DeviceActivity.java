@@ -630,6 +630,7 @@ public class DeviceActivity extends ViewPagerActivity
                     e.printStackTrace();
                 }
             }
+            
         }
     };
 }

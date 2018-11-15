@@ -75,6 +75,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -96,9 +97,12 @@ import com.example.ti.util.CustomToast;
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class MainActivity extends ViewPagerActivity
 {
+    public TcpClient mTcpClient;
     // Requests to other activities
     private static final int REQ_ENABLE_BT = 0;
     private static final int REQ_DEVICE_ACT = 1;
+
+
 
     // GUI
     private static MainActivity mThis = null;
@@ -133,6 +137,7 @@ public class MainActivity extends ViewPagerActivity
         mResourceIdPager = R.id.pager;
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[],
@@ -164,6 +169,8 @@ public class MainActivity extends ViewPagerActivity
             }
         }
     }
+
+
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -229,8 +236,33 @@ public class MainActivity extends ViewPagerActivity
         mFilter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         mFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
         mFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
+
+
+
     }
 
+//    public class ConnectTask extends AsyncTask<String, String, TcpClient> {
+//        @Override
+//        protected TcpClient doInBackground(String... message) {
+//            mTcpClient = new TcpClient(new TcpClient.OnMessageReceived() {
+//                @Override
+//                public void messageReceived(String message) {
+//                    publishProgress(message);
+//                }
+//            });
+//            mTcpClient.run();
+//
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onProgressUpdate(String... values) {
+//            super.onProgressUpdate(values);
+//            //response received from server
+//            Log.d("test", "response " + values[0]);
+//            //process server response here....
+//        }
+//    }
 
     @Override
     public void onDestroy()
@@ -433,6 +465,8 @@ public class MainActivity extends ViewPagerActivity
     {
         boolean mBtEnabled = mBtAdapter.isEnabled();
 
+
+
         if (mBtEnabled)
         {
             if (mScanning)
@@ -452,6 +486,8 @@ public class MainActivity extends ViewPagerActivity
             mDeviceInfoList.clear();
             mScanView.notifyDataSetChanged();
         }
+
+
     }
 
     private void setBusy(boolean f)

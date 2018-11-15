@@ -61,17 +61,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.text.Html;
 import android.util.Log;
-import android.widget.CompoundButton;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.example.ti.ble.common.BluetoothLeService;
 import com.example.ti.ble.common.GattInfo;
 import com.example.ti.ble.common.GenericBluetoothProfile;
@@ -80,6 +73,8 @@ import com.example.ti.util.Point3D;
 
 public class SensorTagMovementProfile extends GenericBluetoothProfile
 {
+
+    public TcpClient mTcpClient;
 
     public SensorTagMovementProfile(Context con, BluetoothDevice device, BluetoothGattService service, BluetoothLeService controller)
     {
@@ -188,14 +183,45 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
             this.tRow.sl1.addValue((float) v.x);
             this.tRow.sl2.addValue((float) v.y);
             this.tRow.sl3.addValue((float) v.z);
+            sampleData += String.format("%.2f %.2f %.2f,", (float) v.x, (float) v.y,(float) v.z);
+
             v = Sensor.MOVEMENT_GYRO.convert(value);
             SensorTagMovementTableRow row = (SensorTagMovementTableRow) this.tRow;
             row.gyroValue.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2f°/s</font>, <font color=#00967D>Y:%.2f°/s</font>, <font color=#00000>Z:%.2f°/s</font>", v.x, v.y, v.z)));
             row.sl4.addValue((float) v.x);
             row.sl5.addValue((float) v.y);
             row.sl6.addValue((float) v.z);
+            sampleData += String.format("%.2f %.2f %.2f\n", (float) v.x, (float) v.y,(float) v.z);
+
+            numSamples++;
+
+            // TODO: Store n samples to a VPN server
+            // TODO: Run the Python script from the VPN server and send back data
+            // TODO: Retrieve the data from the VPN server
+            // TODO: Display that data in the app.
+
+            //  206.189.89.46:8080
+            if(numSamples >5 )
+            {
+                new ConnectTask().execute("");
+                //sends the message to the server
+//            String sample = String.format("%.2f %.2f %.2f", (float) v.x, (float) v.y,(float) v.z);
+
+                if (mTcpClient != null) {
+                    mTcpClient.sendMessage(sampleData);
+
+
+
+                }
+                numSamples =0;
+                sampleData ="";
+            }
+
         }
     }
+
+    private int numSamples = 0;
+    private String sampleData = "";
 
     @Override
     public Map<String, String> getMQTTMap()
@@ -211,4 +237,43 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
         map.put("gyro_z", String.format("%.2f", v.z));
         return map;
     }
+
+
+    public class ConnectTask extends AsyncTask<String, String, TcpClient> {
+        @Override
+        protected TcpClient doInBackground(String... message) {
+
+            //we create a TCPClient object
+            mTcpClient = new TcpClient(new TcpClient.OnMessageReceived() {
+                @Override
+                //here the messageReceived method is implemented
+                public void messageReceived(String message) {
+                    //this method calls the onProgressUpdate
+                    publishProgress(message);
+                    Log.e("ConnectTask", "messageReceived: " + message );
+
+                    if (mTcpClient != null) {
+                        mTcpClient.stopClient();
+
+
+
+                    }
+
+                }
+            });
+            mTcpClient.run();
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            //response received from server
+            Log.d("test", "response " + values[0]);
+            //process server response here....
+        }
+    }
+
+
 }
