@@ -54,6 +54,7 @@ package com.example.ti.ble.sensortag;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -74,7 +75,8 @@ import com.example.ti.util.Point3D;
 public class SensorTagMovementProfile extends GenericBluetoothProfile
 {
 
-    public TcpClient mTcpClient;
+    private TcpClient mTcpClient;
+
 
     public SensorTagMovementProfile(Context con, BluetoothDevice device, BluetoothGattService service, BluetoothLeService controller)
     {
@@ -137,7 +139,7 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
                 Log.d("SensorTagMovementProfile", "Sensor notification enable failed: " + this.configC.getUuid().toString() + " Error: " + error);
         }
 
-        this.periodWasUpdated(1000);
+        this.periodWasUpdated(100);
         this.isEnabled = true;
     }
 
@@ -183,7 +185,7 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
             this.tRow.sl1.addValue((float) v.x);
             this.tRow.sl2.addValue((float) v.y);
             this.tRow.sl3.addValue((float) v.z);
-            sampleData += String.format("%.2f %.2f %.2f,", (float) v.x, (float) v.y,(float) v.z);
+            sampleData += String.format(Locale.getDefault(), "%.2f %.2f %.2f,", (float) v.x, (float) v.y, (float) v.z);
 
             v = Sensor.MOVEMENT_GYRO.convert(value);
             SensorTagMovementTableRow row = (SensorTagMovementTableRow) this.tRow;
@@ -191,30 +193,31 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
             row.sl4.addValue((float) v.x);
             row.sl5.addValue((float) v.y);
             row.sl6.addValue((float) v.z);
-            sampleData += String.format("%.2f %.2f %.2f\n", (float) v.x, (float) v.y,(float) v.z);
+            sampleData += String.format(Locale.getDefault(), "%.2f %.2f %.2f\n", (float) v.x, (float) v.y,(float) v.z);
 
             numSamples++;
 
-            // TODO: Store n samples to a VPN server
+            // TODO: Transmit n samples to VPS
             // TODO: Run the Python script from the VPN server and send back data
             // TODO: Retrieve the data from the VPN server
             // TODO: Display that data in the app.
 
             //  206.189.89.46:8080
-            if(numSamples >5 )
+            if (numSamples >= 30)
             {
                 new ConnectTask().execute("");
-                //sends the message to the server
-//            String sample = String.format("%.2f %.2f %.2f", (float) v.x, (float) v.y,(float) v.z);
+                // sends the message to the server
+                // String sample = String.format("%.2f %.2f %.2f", (float) v.x, (float) v.y,(float) v.z);
 
-                if (mTcpClient != null) {
+                sampleData = sampleData.replace(',', '.');
+
+                if (mTcpClient != null)
+                {
                     mTcpClient.sendMessage(sampleData);
-
-
-
                 }
-                numSamples =0;
-                sampleData ="";
+
+                numSamples = 0;
+                sampleData = "";
             }
 
         }
@@ -239,22 +242,26 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
     }
 
 
-    public class ConnectTask extends AsyncTask<String, String, TcpClient> {
+    public class ConnectTask extends AsyncTask<String, String, TcpClient>
+    {
         @Override
-        protected TcpClient doInBackground(String... message) {
+        protected TcpClient doInBackground(String... message)
+        {
 
             //we create a TCPClient object
-            mTcpClient = new TcpClient(new TcpClient.OnMessageReceived() {
+            mTcpClient = new TcpClient(new TcpClient.OnMessageReceived()
+            {
                 @Override
                 //here the messageReceived method is implemented
-                public void messageReceived(String message) {
+                public void messageReceived(String message)
+                {
                     //this method calls the onProgressUpdate
                     publishProgress(message);
-                    Log.e("ConnectTask", "messageReceived: " + message );
+                    Log.e("ConnectTask", "messageReceived: " + message);
 
-                    if (mTcpClient != null) {
+                    if (mTcpClient != null)
+                    {
                         mTcpClient.stopClient();
-
 
 
                     }
@@ -267,7 +274,8 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
         }
 
         @Override
-        protected void onProgressUpdate(String... values) {
+        protected void onProgressUpdate(String... values)
+        {
             super.onProgressUpdate(values);
             //response received from server
             Log.d("test", "response " + values[0]);

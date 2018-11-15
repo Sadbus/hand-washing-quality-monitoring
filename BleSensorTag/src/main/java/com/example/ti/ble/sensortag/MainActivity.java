@@ -102,8 +102,6 @@ public class MainActivity extends ViewPagerActivity
     private static final int REQ_ENABLE_BT = 0;
     private static final int REQ_DEVICE_ACT = 1;
 
-
-
     // GUI
     private static MainActivity mThis = null;
     private ScanView mScanView;
@@ -284,14 +282,6 @@ public class MainActivity extends ViewPagerActivity
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-    }
-
-
-    private void onBluetooth()
-    {
-        Intent settingsIntent = new Intent(
-                android.provider.Settings.ACTION_BLUETOOTH_SETTINGS);
-        startActivity(settingsIntent);
     }
 
     void onScanViewReady(View view)

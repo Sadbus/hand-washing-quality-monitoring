@@ -154,7 +154,7 @@ public class DeviceActivity extends ViewPagerActivity
 
         // GUI
         mDeviceView = new DeviceView();
-        mSectionsPagerAdapter.addSection(mDeviceView, "Sensors");
+        mSectionsPagerAdapter.addSection(mDeviceView, "Hand Washes");
         mProfiles = new ArrayList<>();
         progressDialog = new ProgressDialog(DeviceActivity.this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
