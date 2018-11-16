@@ -15,7 +15,7 @@ public class TcpClient {
     // IP address to VPS
     public static final String SERVER_IP = "206.189.89.46";
 
-    public static final int SERVER_PORT = 8080;
+    public static final int SERVER_PORT = 34781;
 
     // Data Data samples to send server
     private String mServerMessage;
@@ -108,8 +108,7 @@ public class TcpClient {
 
                 }
 
-                Log.d("RESPONSE FROM SERVER", "S: Received Message: '" + mServerMessage + "'");
-
+//                Log.d("RESPONSE FROM SERVER", "S: Received Message: '" + mServerMessage + "'");
 
 
             } catch (Exception e) {

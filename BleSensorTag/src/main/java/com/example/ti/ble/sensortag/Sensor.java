@@ -201,6 +201,28 @@ public enum Sensor
 
                 }
             },
+    // Humidity
+    HUMIDITY(UUID_HUM_SERV, UUID_HUM_DATA, UUID_HUM_CONF) {
+        @Override
+        public Point3D convert(final byte[] value) {
+            int a = shortUnsignedAtOffset(value, 2);
+            // bits [1..0] are status bits and need to be cleared according
+            // to the user guide, but the iOS code doesn't bother. It should
+            // have minimal impact.
+            a = a - (a % 4);
+
+            return new Point3D((-6f) + 125f * (a / 65535f), 0, 0);
+        }
+    },
+    HUMIDITY2(UUID_HUM_SERV, UUID_HUM_DATA, UUID_HUM_CONF) {
+        @Override
+        public Point3D convert(final byte[] value) {
+            int a = shortUnsignedAtOffset(value, 2);
+
+            return new Point3D(100f * (a / 65535f), 0, 0);
+        }
+    },
+
     GYROSCOPE(UUID_GYR_SERV, UUID_GYR_DATA, UUID_GYR_CONF, (byte) 7)
             {
                 @Override

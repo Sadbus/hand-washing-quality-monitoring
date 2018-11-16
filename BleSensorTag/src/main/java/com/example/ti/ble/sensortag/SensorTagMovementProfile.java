@@ -76,10 +76,13 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
 
     public TcpClient mTcpClient;
 
-    public SensorTagMovementProfile(Context con, BluetoothDevice device, BluetoothGattService service, BluetoothLeService controller)
+    private HandWashStatistics hwStats;
+
+    public SensorTagMovementProfile(Context con, BluetoothDevice device, BluetoothGattService service, BluetoothLeService controller, HandWashStatistics hwStat)
     {
         super(con, device, service, controller);
         this.tRow = new SensorTagMovementTableRow(con);
+        this.hwStats = hwStat;
 
         List<BluetoothGattCharacteristic> characteristics = this.mBTService.getCharacteristics();
 
@@ -195,10 +198,7 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
 
             numSamples++;
 
-            // TODO: Store n samples to a VPN server
-            // TODO: Run the Python script from the VPN server and send back data
-            // TODO: Retrieve the data from the VPN server
-            // TODO: Display that data in the app.
+
 
             //  206.189.89.46:8080
             if(numSamples >5 )
@@ -209,7 +209,6 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
 
                 if (mTcpClient != null) {
                     mTcpClient.sendMessage(sampleData);
-
 
 
                 }
@@ -254,9 +253,6 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
 
                     if (mTcpClient != null) {
                         mTcpClient.stopClient();
-
-
-
                     }
 
                 }
@@ -269,9 +265,15 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-            //response received from server
-            Log.d("test", "response " + values[0]);
-            //process server response here....
+
+            // Updates Handwash Here
+            int receivedValue= Integer.parseInt(values[0]);
+            Log.e("Wash", "Received value " + receivedValue);
+            hwStats.updateWash(receivedValue);
+
+
+
+
         }
     }
 

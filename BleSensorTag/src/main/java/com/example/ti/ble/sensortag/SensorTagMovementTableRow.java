@@ -114,6 +114,8 @@ public class SensorTagMovementTableRow extends GenericCharacteristicTableRow
                 setId(8);
             }
         };
+
+
         this.gyroValue = new TextView(con)
         {
             {
@@ -123,6 +125,7 @@ public class SensorTagMovementTableRow extends GenericCharacteristicTableRow
                 setVisibility(View.VISIBLE);
             }
         };
+
 
         RelativeLayout.LayoutParams tmpLayoutParams = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT,

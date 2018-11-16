@@ -73,9 +73,6 @@ import android.content.res.XmlResourceParser;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Toast;
@@ -98,6 +95,8 @@ public class DeviceActivity extends ViewPagerActivity
     private static final int FWUPDATE_ACT_REQ = 1;
 
     private DeviceView mDeviceView = null;
+
+    private HandWashStatistics hwStatMain = new HandWashStatistics();
 
     // BLE
     private BluetoothLeService mBtLeService = null;
@@ -476,7 +475,7 @@ public class DeviceActivity extends ViewPagerActivity
 
                                 if (SensorTagMovementProfile.isCorrectService(s))
                                 {
-                                    SensorTagMovementProfile mov = new SensorTagMovementProfile(context, mBluetoothDevice, s, mBtLeService);
+                                    SensorTagMovementProfile mov = new SensorTagMovementProfile(context, mBluetoothDevice, s, mBtLeService, hwStatMain);
                                     mProfiles.add(mov);
                                     if (nrNotificationsOn < maxNotifications)
                                     {
@@ -491,6 +490,21 @@ public class DeviceActivity extends ViewPagerActivity
                                 if (SensorTagAccelerometerProfile.isCorrectService(s))
                                 {
                                     SensorTagAccelerometerProfile acc = new SensorTagAccelerometerProfile(context, mBluetoothDevice, s, mBtLeService);
+                                    mProfiles.add(acc);
+                                    if (nrNotificationsOn < maxNotifications)
+                                    {
+                                        acc.configureService();
+                                        nrNotificationsOn++;
+                                    } else
+                                    {
+                                        acc.grayOutCell(true);
+                                    }
+                                    Log.d("DeviceActivity", "Found Motion !");
+
+                                }
+                                if (StatisticsProfile.isCorrectService(s))
+                                {
+                                    StatisticsProfile acc = new StatisticsProfile(context, mBluetoothDevice, s, mBtLeService, hwStatMain);
                                     mProfiles.add(acc);
                                     if (nrNotificationsOn < maxNotifications)
                                     {

@@ -84,5 +84,13 @@ public class SensorTagGatt {
       UUID_TST_DATA = fromString("f000aa65-0451-4000-b000-000000000000"), // Test result
 
       UUID_KEY_SERV = fromString("0000ffe0-0000-1000-8000-00805f9b34fb"), 
-      UUID_KEY_DATA = fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
+      UUID_KEY_DATA = fromString("0000ffe1-0000-1000-8000-00805f9b34fb"),
+
+    // Humidity
+    UUID_HUM_SERV = fromString("f000aa20-0451-4000-b000-000000000000"),
+            UUID_HUM_DATA = fromString("f000aa21-0451-4000-b000-000000000000"),
+            UUID_HUM_CONF = fromString("f000aa22-0451-4000-b000-000000000000"), // 0: disable, 1: enable
+            UUID_HUM_PERI = fromString("f000aa23-0451-4000-b000-000000000000"); // Period in tens of milliseconds;
+
+
 }

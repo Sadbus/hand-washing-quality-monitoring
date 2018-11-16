@@ -52,6 +52,7 @@
  **************************************************************************************************/
 package com.example.ti.ble.common;
 
+import com.example.ti.ble.sensortag.HandWashStatistics;
 import com.example.ti.util.GenericCharacteristicTableRow;
 
 import android.bluetooth.BluetoothDevice;
@@ -69,6 +70,8 @@ import android.widget.TableRow;
 import java.util.Map;
 
 public class GenericBluetoothProfile {
+
+//	public HandWashStatistics hwStats;
 	protected BluetoothDevice mBTDevice;
 	protected BluetoothGattService mBTService;
 	protected GenericCharacteristicTableRow tRow;
@@ -81,6 +84,7 @@ public class GenericBluetoothProfile {
 	protected boolean isRegistered;
     public boolean isConfigured;
     public boolean isEnabled;
+
 	public GenericBluetoothProfile(final Context con,BluetoothDevice device,BluetoothGattService service,BluetoothLeService controller) {
 		super();
 		this.mBTDevice = device;
@@ -92,6 +96,7 @@ public class GenericBluetoothProfile {
 		this.configC = null;
 		this.context = con;
 		this.isRegistered = false;
+//		this.hwStats = new HandWashStatistics(1, 1, 1);
 	}
 	public void onResume() {
 		if (this.isRegistered == false) {
