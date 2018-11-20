@@ -8,12 +8,21 @@ public class HandWashStatistics {
     private int OkWash;
     private int GoodWash;
 
+    public String mHandWash;
+
     public HandWashStatistics()
     {
         this.BadWash = 0;
         this.OkWash = 0;
         this.GoodWash = 0;
+        mHandWash = "";
+
     }
+    public void updateHandWash(String data){
+        mHandWash = mHandWash + data + "\n";
+    }
+
+
     public float getScore()
     {
         return (float)(GoodWash + 3*OkWash + 5*GoodWash)/50;

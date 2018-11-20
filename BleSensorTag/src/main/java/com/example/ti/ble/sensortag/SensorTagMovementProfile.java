@@ -56,6 +56,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -118,6 +119,9 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
 
         row.gyroValue.setText("X:0.00'/s, Y:0.00'/s, Z:0.00'/s");
         this.tRow.periodBar.setProgress(0);
+
+        // Test Data
+        //hwStats.updateHandWash("Hand Wash Test 1");
     }
 
     public static boolean isCorrectService(BluetoothGattService service)
@@ -147,7 +151,7 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
                 Log.d("SensorTagMovementProfile", "Sensor notification enable failed: " + this.configC.getUuid().toString() + " Error: " + error);
         }
 
-        this.periodWasUpdated(1000);
+        this.periodWasUpdated(100);
         this.isEnabled = true;
     }
 
@@ -207,7 +211,7 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
             numSamples++;
 
             //  206.189.89.46:8080
-            if (numSamples > 30)
+            if (numSamples >= 30)
             {
                 new ConnectTask().execute("");
                 // sends the message to the server
@@ -315,32 +319,37 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
                     break;
                 default:
             }
-            hwStats.updateWash(receivedValue);
+            //hwStats.updateWash(receivedValue);
         }
     }
 
     @SuppressLint("LongLogTag")
     private void HandWash()
     {
-        float score = (numBad + 3*numMed + 5*numGood) / 10;
+        int score = (3*numBad + 6*numMed + 10*numGood) / 10;
+
+        if (score > 5)
+            score = 5;
+
         int duration = (numBad + numMed + numGood) * 3;
 
-        Date date = new Date();
-        String wash =  date.toString() + ": " + score + "/5. Duration: " + duration + '\n';
+        Date currentDate = new Date();
+        String timeShort = DateFormat.getTimeInstance(DateFormat.SHORT).format(currentDate);
+
+
+        String wash =  timeShort + ": " + score + "/5. for " + duration + " seconds" +  '\n';
 
         Log.d("SensorTagMovementProfile", "HandWash detected at: " + wash);
         Log.d("SensorTagMovementProfile", "HandWash detected at: Bad=" + numBad + ", med=" + numMed + ", good=" + numGood);
-
 
         numBad = 0;
         numMed = 0;
         numGood = 0;
 
         // TODO: Store handwash
-        writeToFile(wash, context);
-
+        //writeToFile(wash, context);
+        hwStats.updateHandWash(wash);
         // TODO: Update GUI
-
     }
 
     private void writeToFile(String data,Context context) {

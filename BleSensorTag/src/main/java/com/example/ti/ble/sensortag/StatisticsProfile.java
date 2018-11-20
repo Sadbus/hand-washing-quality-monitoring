@@ -69,9 +69,11 @@ public class StatisticsProfile extends GenericBluetoothProfile {
         if (c.equals(this.dataC)){
         }
         // Prints out the values from the handwash
-        this.tRow.value.setText(String.format("Bad Wash: %s, Ok Wash: %s, Good Wash: %s\nAmount of Washes: %s\nScore: %.2f", hwStats.getBadWash(), hwStats.getOkWash(), hwStats.getGoodWash(),hwStats.getTotalWash(), hwStats.getScore()));
-//        Log.e("Wash", "Statis Init" + hwStats.getBadWash()+ hwStats.getOkWash()+ hwStats.getGoodWash()+hwStats.getTotalWash()+hwStats.getScore() );
-        Log.e("Wash", "OK Handwash: " + hwStats.getOkWash());
+        //this.tRow.value.setText(String.format("Bad Wash: %s, Ok Wash: %s, Good Wash: %s\nAmount of Washes: %s\nScore: %.2f", hwStats.getBadWash(), hwStats.getOkWash(), hwStats.getGoodWash(),hwStats.getTotalWash(), hwStats.getScore()));
+        this.tRow.value.setText(hwStats.mHandWash);
+//
+// Log.e("Wash", "Statis Init" + hwStats.getBadWash()+ hwStats.getOkWash()+ hwStats.getGoodWash()+hwStats.getTotalWash()+hwStats.getScore() );
+        //Log.e("Wash", "OK Handwash: " + hwStats.getOkWash());
     }
     @Override
     public Map<String,String> getMQTTMap() {
