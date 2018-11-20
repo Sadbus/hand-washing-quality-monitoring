@@ -52,11 +52,18 @@
  **************************************************************************************************/
 package com.example.ti.ble.sensortag;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -78,6 +85,7 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
 
     private HandWashStatistics hwStats;
 
+    @SuppressLint("SetTextI18n")
     public SensorTagMovementProfile(Context con, BluetoothDevice device, BluetoothGattService service, BluetoothLeService controller, HandWashStatistics hwStat)
     {
         super(con, device, service, controller);
@@ -102,16 +110,14 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
             }
         }
 
-
         this.tRow.setIcon(this.getIconPrefix(), this.dataC.getUuid().toString());
-
         this.tRow.title.setText(GattInfo.uuidToName(UUID.fromString(this.dataC.getUuid().toString())));
         this.tRow.uuidLabel.setText(this.dataC.getUuid().toString());
         this.tRow.value.setText("X:0.00G, Y:0.00G, Z:0.00G");
         SensorTagMovementTableRow row = (SensorTagMovementTableRow) this.tRow;
 
         row.gyroValue.setText("X:0.00'/s, Y:0.00'/s, Z:0.00'/s");
-        this.tRow.periodBar.setProgress(100);
+        this.tRow.periodBar.setProgress(0);
     }
 
     public static boolean isCorrectService(BluetoothGattService service)
@@ -122,6 +128,7 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
         } else return false;
     }
 
+    @SuppressLint("LongLogTag")
     @Override
     public void enableService()
     {
@@ -144,6 +151,7 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
         this.isEnabled = true;
     }
 
+    @SuppressLint("LongLogTag")
     @Override
     public void disableService()
     {
@@ -181,39 +189,39 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
         {
             Point3D v;
             v = Sensor.MOVEMENT_ACC.convert(value);
-            if (this.tRow.config == false)
-                this.tRow.value.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2fG</font>, <font color=#00967D>Y:%.2fG</font>, <font color=#00000>Z:%.2fG</font>", v.x, v.y, v.z)));
+            if (!this.tRow.config)
+                this.tRow.value.setText(Html.fromHtml(String.format(Locale.ENGLISH,"<font color=#FF0000>X:%.2fG</font>, <font color=#00967D>Y:%.2fG</font>, <font color=#00000>Z:%.2fG</font>", v.x, v.y, v.z)));
             this.tRow.sl1.addValue((float) v.x);
             this.tRow.sl2.addValue((float) v.y);
             this.tRow.sl3.addValue((float) v.z);
-            sampleData += String.format("%.2f %.2f %.2f,", (float) v.x, (float) v.y,(float) v.z);
+            sampleData += String.format(Locale.ENGLISH, "%.2f %.2f %.2f,", (float) v.x, (float) v.y, (float) v.z);
 
             v = Sensor.MOVEMENT_GYRO.convert(value);
             SensorTagMovementTableRow row = (SensorTagMovementTableRow) this.tRow;
-            row.gyroValue.setText(Html.fromHtml(String.format("<font color=#FF0000>X:%.2f°/s</font>, <font color=#00967D>Y:%.2f°/s</font>, <font color=#00000>Z:%.2f°/s</font>", v.x, v.y, v.z)));
+            row.gyroValue.setText(Html.fromHtml(String.format(Locale.ENGLISH,"<font color=#FF0000>X:%.2f°/s</font>, <font color=#00967D>Y:%.2f°/s</font>, <font color=#00000>Z:%.2f°/s</font>", v.x, v.y, v.z)));
             row.sl4.addValue((float) v.x);
             row.sl5.addValue((float) v.y);
             row.sl6.addValue((float) v.z);
-            sampleData += String.format("%.2f %.2f %.2f\n", (float) v.x, (float) v.y,(float) v.z);
+            sampleData += String.format(Locale.ENGLISH, "%.2f %.2f %.2f\n", (float) v.x, (float) v.y, (float) v.z);
 
             numSamples++;
 
-
-
             //  206.189.89.46:8080
-            if(numSamples >5 )
+            if (numSamples > 30)
             {
                 new ConnectTask().execute("");
-                //sends the message to the server
-//            String sample = String.format("%.2f %.2f %.2f", (float) v.x, (float) v.y,(float) v.z);
+                // sends the message to the server
+                //String sample = String.format("%.2f %.2f %.2f", (float) v.x, (float) v.y,(float) v.z);
 
-                if (mTcpClient != null) {
+                sampleData += ',';
+
+                if (mTcpClient != null)
+                {
                     mTcpClient.sendMessage(sampleData);
-
-
                 }
-                numSamples =0;
-                sampleData ="";
+
+                numSamples = 0;
+                sampleData = "";
             }
 
         }
@@ -222,36 +230,45 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
     private int numSamples = 0;
     private String sampleData = "";
 
+    private int numBad = 0;
+    private int numMed = 0;
+    private int numGood = 0;
+
     @Override
     public Map<String, String> getMQTTMap()
     {
         Point3D v = Sensor.MOVEMENT_ACC.convert(this.dataC.getValue());
         Map<String, String> map = new HashMap<String, String>();
-        map.put("acc_x", String.format("%.2f", v.x));
-        map.put("acc_y", String.format("%.2f", v.y));
-        map.put("acc_z", String.format("%.2f", v.z));
+        map.put("acc_x", String.format(Locale.ENGLISH,"%.2f", v.x));
+        map.put("acc_y", String.format(Locale.ENGLISH,"%.2f", v.y));
+        map.put("acc_z", String.format(Locale.ENGLISH,"%.2f", v.z));
         v = Sensor.MOVEMENT_GYRO.convert(this.dataC.getValue());
-        map.put("gyro_x", String.format("%.2f", v.x));
-        map.put("gyro_y", String.format("%.2f", v.y));
-        map.put("gyro_z", String.format("%.2f", v.z));
+        map.put("gyro_x", String.format(Locale.ENGLISH,"%.2f", v.x));
+        map.put("gyro_y", String.format(Locale.ENGLISH,"%.2f", v.y));
+        map.put("gyro_z", String.format(Locale.ENGLISH,"%.2f", v.z));
         return map;
     }
 
 
-    public class ConnectTask extends AsyncTask<String, String, TcpClient> {
+    public class ConnectTask extends AsyncTask<String, String, TcpClient>
+    {
         @Override
-        protected TcpClient doInBackground(String... message) {
+        protected TcpClient doInBackground(String... message)
+        {
 
             //we create a TCPClient object
-            mTcpClient = new TcpClient(new TcpClient.OnMessageReceived() {
+            mTcpClient = new TcpClient(new TcpClient.OnMessageReceived()
+            {
                 @Override
                 //here the messageReceived method is implemented
-                public void messageReceived(String message) {
+                public void messageReceived(String message)
+                {
                     //this method calls the onProgressUpdate
                     publishProgress(message);
-                    Log.e("ConnectTask", "messageReceived: " + message );
+                    Log.e("ConnectTask", "messageReceived: " + message);
 
-                    if (mTcpClient != null) {
+                    if (mTcpClient != null)
+                    {
                         mTcpClient.stopClient();
                     }
 
@@ -263,19 +280,78 @@ public class SensorTagMovementProfile extends GenericBluetoothProfile
         }
 
         @Override
-        protected void onProgressUpdate(String... values) {
+        protected void onProgressUpdate(String... values)
+        {
             super.onProgressUpdate(values);
 
             // Updates Handwash Here
-            int receivedValue= Integer.parseInt(values[0]);
+            int receivedValue = Integer.parseInt(values[0]);
             Log.e("Wash", "Received value " + receivedValue);
+
+            switch (receivedValue)
+            {
+                case 0:
+                    if (numBad > 0 || numMed > 0 || numGood > 0)
+                        HandWash();
+
+                    break;
+                case 1:
+                    if ((numBad + numMed + numGood)*3 >= 30)
+                        HandWash();
+
+                    numBad++;
+                    break;
+                case 2:
+                    if ((numBad + numMed + numGood)*3 >= 30)
+                        HandWash();
+
+                    numMed++;
+                    break;
+                case 3:
+                    if ((numBad + numMed + numGood)*3 >= 30)
+                        HandWash();
+
+                    numGood++;
+                    break;
+                default:
+            }
             hwStats.updateWash(receivedValue);
-
-
-
-
         }
     }
 
+    @SuppressLint("LongLogTag")
+    private void HandWash()
+    {
+        float score = (numBad + 3*numMed + 5*numGood) / 10;
+        int duration = (numBad + numMed + numGood) * 3;
+
+        Date date = new Date();
+        String wash =  date.toString() + ": " + score + "/5. Duration: " + duration + '\n';
+
+        Log.d("SensorTagMovementProfile", "HandWash detected at: " + wash);
+        Log.d("SensorTagMovementProfile", "HandWash detected at: Bad=" + numBad + ", med=" + numMed + ", good=" + numGood);
+
+
+        numBad = 0;
+        numMed = 0;
+        numGood = 0;
+
+        // TODO: Store handwash
+        writeToFile(wash, context);
+
+        // TODO: Update GUI
+
+    }
+
+    private void writeToFile(String data,Context context) {
+        try {
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput("hw.txt", Context.MODE_APPEND));
+            outputStreamWriter.write(data);
+            outputStreamWriter.close();
+        }
+        catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
 
 }

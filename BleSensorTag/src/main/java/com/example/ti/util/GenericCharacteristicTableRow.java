@@ -127,6 +127,7 @@ public class GenericCharacteristicTableRow extends TableRow implements View.OnCl
 		this.setBackgroundColor(Color.TRANSPARENT);
 		this.setOnClickListener(this);
 		this.periodMinVal = 100;
+
 		
 		// GATT database
 		Resources res = getResources();
@@ -141,7 +142,6 @@ public class GenericCharacteristicTableRow extends TableRow implements View.OnCl
 			setARGB(255, 0, 0, 0);
 			}
 		};
-		
 		
 		//Add all views for the default cell
 		//Service icon
@@ -354,9 +354,6 @@ public class GenericCharacteristicTableRow extends TableRow implements View.OnCl
 		display.getSize(dSize);
 		Drawable image = null;
 		
-		
-		
-		
 		Log.d("GenericCharacteristicTableRow", "Width : " + dSize.x + " Height : " + dSize.y);
 		Log.d("GenericCharacteristicTableRow","Fetching icon : " + GattInfo.uuidToIcon(UUID.fromString(uuid)));
 		if (dSize.x > 1100) {
@@ -440,7 +437,6 @@ public class GenericCharacteristicTableRow extends TableRow implements View.OnCl
 			
 		};
 		icon.setLayoutParams(iconItemParams);
-		
 	}
 	@Override
 	protected void onDraw(Canvas canvas) {

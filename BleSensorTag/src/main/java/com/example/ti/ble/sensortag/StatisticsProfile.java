@@ -26,7 +26,7 @@ public class StatisticsProfile extends GenericBluetoothProfile {
         this.tRow =  new GenericCharacteristicTableRow(con);
         this.hwStats = hwstat;
 
-            // Period Bar
+        // Period Bar
 
         List<BluetoothGattCharacteristic> characteristics = this.mBTService.getCharacteristics();
 
